@@ -26,10 +26,10 @@ export async function promptProjectOptions(): Promise<ProjectOptions> {
 
       language: async () => {
         const languages = await getAvailableLanguages();
-        return p.select<string>({
+        return (await p.select({
           message: 'Select a programming language:',
-          options: languages,
-        });
+          options: languages as any,
+        })) as string;
       },
 
       framework: async ({ results }) => {
@@ -38,10 +38,10 @@ export async function promptProjectOptions(): Promise<ProjectOptions> {
           p.cancel(`No frameworks registered for language: ${results.language}`);
           process.exit(0);
         }
-        return p.select({
+        return (await p.select({
           message: 'Select a framework:',
-          options: frameworks,
-        });
+          options: frameworks as any,
+        })) as string;
       },
 
       useDocker: () =>
