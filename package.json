@@ -1,5 +1,5 @@
 {
-  "name": "backendforge",
+  "name": "@ak3311g/backendforge",
   "version": "0.2.1",
   "type": "module",
   "description": "Production-ready backend generator",
