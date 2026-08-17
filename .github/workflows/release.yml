@@ -1,0 +1,139 @@
+name: Release & Distribute
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  # ==========================================
+  # JOB 1: Publish to npm Registry
+  # ==========================================
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build TypeScript & Assets
+        run: npm run build
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance
+
+  # ==========================================
+  # JOB 2: Build Standalone Executable Binaries
+  # ==========================================
+  build-binaries:
+    name: Build Binary (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          # Linux x64
+          - os: ubuntu-latest
+            target: bun-linux-x64
+            binary_name: backendforge
+            archive_name: backendforge-linux-x64.tar.gz
+
+          # macOS ARM64 (Apple Silicon M1/M2/M3)
+          - os: macos-latest
+            target: bun-darwin-arm64
+            binary_name: backendforge
+            archive_name: backendforge-darwin-arm64.tar.gz
+
+          # macOS x64 (Intel)
+          - os: macos-13
+            target: bun-darwin-x64
+            binary_name: backendforge
+            archive_name: backendforge-darwin-x64.tar.gz
+
+          # Windows x64
+          - os: windows-latest
+            target: bun-windows-x64
+            binary_name: backendforge.exe
+            archive_name: backendforge-windows-x64.zip
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Compile Standalone Binary
+        run: bun build --compile --target=${{ matrix.target }} ./src/index.ts --outfile ./${{ matrix.binary_name }}
+
+      # Package Linux & macOS binaries with tar.gz
+      - name: Package Unix Archive
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ./${{ matrix.binary_name }}
+          tar -czvf ${{ matrix.archive_name }} ${{ matrix.binary_name }} README.md LICENSE
+
+      # Package Windows binary with zip
+      - name: Package Windows Archive
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ${{ matrix.binary_name }}, README.md, LICENSE -DestinationPath ${{ matrix.archive_name }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.archive_name }}
+          path: ${{ matrix.archive_name }}
+
+  # ==========================================
+  # JOB 3: Create GitHub Release with Assets
+  # ==========================================
+  create-release:
+    name: Publish GitHub Release
+    needs: [build-binaries, publish-npm]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download All Binary Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Generate Checksums (SHA-256)
+        working-directory: release-assets
+        run: |
+          sha256sum * > checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          files: |
+            release-assets/*
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

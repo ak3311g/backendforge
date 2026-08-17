@@ -1,0 +1,7 @@
+{
+  "id": "gin",
+  "name": "Gin",
+  "hint": "Martini-like API with 40x performance, battle-tested standard",
+  "languages": ["go"],
+  "enabled": true
+}

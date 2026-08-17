@@ -1,0 +1,6 @@
+{
+  "id": "typescript",
+  "name": "TypeScript",
+  "hint": "Type-safe JavaScript runtime (Node.js/Bun)",
+  "enabled": true
+}
