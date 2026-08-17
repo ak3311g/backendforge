@@ -11,13 +11,13 @@ permissions:
 
 jobs:
   # ==========================================
-  # JOB 1: Publish to npm Registry
+  # 1. PUBLISH TO NPM
   # ==========================================
   publish-npm:
     name: Publish to npm
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -29,21 +29,22 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build TypeScript & Assets
+      - name: Build TypeScript
         run: npm run build
 
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+        run: npm publish --access public
 
   # ==========================================
-  # JOB 2: Build Standalone Executable Binaries
+  # 2. BUILD STANDALONE BINARIES
   # ==========================================
   build-binaries:
     name: Build Binary (${{ matrix.target }})
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           # Linux x64
@@ -52,7 +53,7 @@ jobs:
             binary_name: backendforge
             archive_name: backendforge-linux-x64.tar.gz
 
-          # macOS ARM64 (Apple Silicon M1/M2/M3)
+          # macOS ARM64
           - os: macos-latest
             target: bun-darwin-arm64
             binary_name: backendforge
@@ -79,27 +80,29 @@ jobs:
         with:
           bun-version: latest
 
-      - name: Install Dependencies
-        run: bun install --frozen-lockfile
+      - name: Install Project Dependencies
+        run: bun install
 
+      # Compile binary into an isolated folder
       - name: Compile Standalone Binary
+        shell: bash
         run: |
           mkdir -p isolated_bin
           bun build --compile --target=${{ matrix.target }} ./src/index.ts --outfile ./isolated_bin/${{ matrix.binary_name }}
 
-      # Package Linux & macOS binaries with tar.gz
+      # Unix: Archive ONLY the binary
       - name: Package Unix Archive
         if: runner.os != 'Windows'
         run: |
-          chmod +x ./${{ matrix.binary_name }}
-          tar -czvf ${{ matrix.archive_name }} ${{ matrix.binary_name }} README.md LICENSE
+          chmod +x ./isolated_bin/${{ matrix.binary_name }}
+          tar -czvf ${{ matrix.archive_name }} -C isolated_bin ${{ matrix.binary_name }}
 
-      # Package Windows binary with zip
+      # Windows: Archive ONLY the .exe
       - name: Package Windows Archive
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path ${{ matrix.binary_name }}, README.md, LICENSE -DestinationPath ${{ matrix.archive_name }}
+          Compress-Archive -Path isolated_bin\${{ matrix.binary_name }} -DestinationPath ${{ matrix.archive_name }} -Force
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -108,11 +111,11 @@ jobs:
           path: ${{ matrix.archive_name }}
 
   # ==========================================
-  # JOB 3: Create GitHub Release with Assets
+  # 3. ATTACH ASSETS TO GITHUB RELEASE
   # ==========================================
   create-release:
     name: Publish GitHub Release
-    needs: [build-binaries, publish-npm]
+    needs: [build-binaries]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -124,18 +127,14 @@ jobs:
           path: release-assets
           merge-multiple: true
 
-      - name: Generate Checksums (SHA-256)
-        working-directory: release-assets
-        run: |
-          sha256sum * > checksums.txt
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           files: |
-            release-assets/*
+            release-assets/*.zip
+            release-assets/*.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
