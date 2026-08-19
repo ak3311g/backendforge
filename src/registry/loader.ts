@@ -1,99 +1,22 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import fs from 'fs-extra';
+import { LANGUAGES, FRAMEWORKS } from './data.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export interface LanguageMetadata {
-  id: string;
-  name: string;
-  hint?: string;
-  enabled: boolean;
-}
+// Languages/frameworks are statically embedded (see data.ts) rather than
+// read from disk, so this works identically whether running via `bun run`,
+// the npm-installed CLI, or a Bun --compile standalone .exe with no
+// registry/ folder anywhere near it.
 
-export interface FrameworkMetadata {
-  id: string;
-  name: string;
-  hint?: string;
-  languages: string[];
-  enabled: boolean;
-}
-
-function getRegistryPath(subfolder: string): string {
-  const cwdPath = path.resolve(process.cwd(), 'registry', subfolder);
-  if (fs.existsSync(cwdPath)) return cwdPath;
-
-  const execDirPath = path.resolve(path.dirname(process.execPath), 'registry', subfolder);
-  if (fs.existsSync(execDirPath)) return execDirPath;
-
-  const relativePath = path.resolve(__dirname, '../../registry', subfolder);
-  if (fs.existsSync(relativePath)) return relativePath;
-
-  return path.resolve(__dirname, '../registry', subfolder);
-}
-
-// 1. Dynamically load all enabled languages
 export async function getAvailableLanguages(): Promise<Array<{ value: string; label: string; hint?: string }>> {
-  const registryDir = getRegistryPath('languages');
-
-  if (!(await fs.pathExists(registryDir))) {
-    console.error(`[Debug] Languages folder not found at: ${registryDir}`);
-    return [];
-  }
-
-  const files = await fs.readdir(registryDir);
-  const languages: Array<{ value: string; label: string; hint?: string }> = [];
-
-  for (const file of files) {
-    if (file.endsWith('.json')) {
-      const filePath = path.join(registryDir, file);
-      try {
-        const metadata: LanguageMetadata = await fs.readJson(filePath);
-        if (metadata.enabled) {
-          languages.push({
-            value: metadata.id,
-            label: metadata.name,
-            hint: metadata.hint,
-          });
-        }
-      } catch (err) {
-        console.error(`Failed to parse language file: ${file}`);
-      }
-    }
-  }
-
-  return languages;
+  return LANGUAGES.filter((lang) => lang.enabled).map((lang) => ({
+    value: lang.id,
+    label: lang.name,
+    hint: lang.hint,
+  }));
 }
 
-// 2. Dynamically load frameworks supporting the chosen language
 export async function getAvailableFrameworks(selectedLanguage: string): Promise<Array<{ value: string; label: string; hint?: string }>> {
-  const registryDir = getRegistryPath('frameworks');
-
-  if (!(await fs.pathExists(registryDir))) {
-    console.error(`[Debug] Frameworks folder not found at: ${registryDir}`);
-    return [];
-  }
-
-  const files = await fs.readdir(registryDir);
-  const frameworks: Array<{ value: string; label: string; hint?: string }> = [];
-
-  for (const file of files) {
-    if (file.endsWith('.json')) {
-      const filePath = path.join(registryDir, file);
-      try {
-        const metadata: FrameworkMetadata = await fs.readJson(filePath);
-        if (metadata.enabled && metadata.languages.includes(selectedLanguage)) {
-          frameworks.push({
-            value: metadata.id,
-            label: metadata.name,
-            hint: metadata.hint,
-          });
-        }
-      } catch (err) {
-        console.error(`Failed to parse framework file: ${file}`);
-      }
-    }
-  }
-
-  return frameworks;
+  return FRAMEWORKS.filter((fw) => fw.enabled && fw.languages.includes(selectedLanguage)).map((fw) => ({
+    value: fw.id,
+    label: fw.name,
+    hint: fw.hint,
+  }));
 }

@@ -1,36 +1,18 @@
-package main
+FROM golang:1.22-alpine AS builder
+WORKDIR /app
 
-import (
-	"log"
+COPY go.mod go.sum* ./
+RUN go mod download
 
-	"my-gin-backend/internal/config"
-	"my-gin-backend/internal/modules/auth"
-	"my-gin-backend/internal/modules/health"
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/server ./cmd/api
 
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
-)
+FROM alpine:3.19
+WORKDIR /app
 
-func main() {
-	config.LoadConfig()
-	config.ConnectDB()
+RUN apk --no-cache add ca-certificates
 
-	// Auto migrate schema
-	if err := config.DB.AutoMigrate(&auth.User{}); err != nil {
-		log.Fatalf("Database migration failed: %v", err)
-	}
+COPY --from=builder /app/bin/server .
 
-	r := gin.Default()
-	r.Use(cors.Default())
-
-	api := r.Group("/api/v1")
-	{
-		health.RegisterRoutes(api.Group("/health"))
-		auth.RegisterRoutes(api.Group("/auth"))
-	}
-
-	log.Printf("🚀 Server running on port %s", config.AppConfig.Port)
-	if err := r.Run(":" + config.AppConfig.Port); err != nil {
-		log.Fatalf("Server failed to start: %v", err)
-	}
-}
+EXPOSE 8080
+CMD ["./server"]

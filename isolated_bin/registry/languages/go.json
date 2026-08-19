@@ -1,6 +1,0 @@
-{
-  "id": "go",
-  "name": "Go (Golang)",
-  "hint": "High performance, fast compilation, built-in concurrency",
-  "enabled": true
-}

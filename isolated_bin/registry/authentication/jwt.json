@@ -1,6 +1,0 @@
-{
-  "id": "jwt",
-  "name": "JSON Web Tokens (JWT)",
-  "hint": "Stateless token-based authentication using JOSE",
-  "enabled": true
-}

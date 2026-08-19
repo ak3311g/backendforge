@@ -1,6 +1,0 @@
-{
-  "id": "python",
-  "name": "Python",
-  "hint": "Clean syntax, rich ecosystem (FastAPI/Django)",
-  "enabled": true
-}

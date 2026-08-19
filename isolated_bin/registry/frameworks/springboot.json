@@ -1,7 +1,0 @@
-{
-  "id": "springboot",
-  "name": "Spring Boot",
-  "hint": "Enterprise standard with Spring Data JPA & Spring Security",
-  "languages": ["java"],
-  "enabled": true
-}

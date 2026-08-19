@@ -1,8 +1,0 @@
-{
-  "id": "fastify",
-  "name": "Fastify",
-  "hint": "High performance, modern plugin architecture",
-  "languages": ["typescript"],
-  "architecture": ["layered", "modular"],
-  "enabled": true
-}

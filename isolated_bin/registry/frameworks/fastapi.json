@@ -1,7 +1,0 @@
-{
-  "id": "fastapi",
-  "name": "FastAPI",
-  "hint": "High-performance Python async API with Pydantic and SQLAlchemy",
-  "languages": ["python"],
-  "enabled": true
-}

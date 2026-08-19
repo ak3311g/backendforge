@@ -1,7 +1,0 @@
-{
-  "id": "express",
-  "name": "Express",
-  "hint": "Classic, battle-tested ecosystem",
-  "languages": ["typescript"],
-  "enabled": true
-}

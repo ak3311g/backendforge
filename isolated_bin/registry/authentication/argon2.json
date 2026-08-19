@@ -1,6 +1,0 @@
-{
-  "id": "argon2",
-  "name": "Argon2",
-  "hint": "Modern, memory-hard password hashing algorithm",
-  "enabled": true
-}
