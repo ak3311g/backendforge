@@ -1,6 +1,6 @@
 {
   "name": "@ak3311g/backendforge",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "publishConfig": {
     "access": "public"
   },
