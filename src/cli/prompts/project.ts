@@ -26,21 +26,25 @@ export async function promptProjectOptions(): Promise<ProjectOptions> {
 
       language: async () => {
         const languages = await getAvailableLanguages();
+        if (!languages || languages.length === 0) {
+          p.cancel('No languages available.');
+          process.exit(1);
+        }
         return (await p.select({
           message: 'Select a programming language:',
-          options: languages as any,
+          options: languages,
         })) as string;
       },
 
       framework: async ({ results }) => {
         const frameworks = await getAvailableFrameworks(results.language as string);
-        if (frameworks.length === 0) {
-          p.cancel(`No frameworks registered for language: ${results.language}`);
-          process.exit(0);
+        if (!frameworks || frameworks.length === 0) {
+          p.cancel(`No frameworks available for ${results.language}`);
+          process.exit(1);
         }
         return (await p.select({
           message: 'Select a framework:',
-          options: frameworks as any,
+          options: frameworks,
         })) as string;
       },
 

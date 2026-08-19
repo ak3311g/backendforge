@@ -1,0 +1,29 @@
+{
+  "name": "template-hono-api",
+  "version": "1.0.0",
+  "description": "Hono Modular API generated with BackendForge",
+  "main": "dist/server.js",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.8.2",
+    "@hono/zod-validator": "^0.2.1",
+    "@prisma/client": "^5.10.0",
+    "argon2": "^0.40.1",
+    "dotenv": "^16.4.5",
+    "hono": "^4.1.0",
+    "jose": "^5.2.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "prisma": "^5.10.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

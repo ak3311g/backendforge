@@ -3,7 +3,7 @@ name: Release & Distribute
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 permissions:
   contents: write
@@ -24,7 +24,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
 
       - name: Install Dependencies
         run: npm ci
@@ -86,17 +86,21 @@ jobs:
 
       # Unix: Archive ONLY the binary
       - name: Package Unix Archive
-        if: runner.os != 'Windows'
-        run: |
+      if: runner.os != 'Windows'
+      run: |
           chmod +x ./isolated_bin/${{ matrix.binary_name }}
-          tar -czvf ${{ matrix.archive_name }} -C isolated_bin ${{ matrix.binary_name }}
+          cp -r registry isolated_bin/registry
+          cp -r templates isolated_bin/templates
+          tar -czvf ${{ matrix.archive_name }} -C isolated_bin .
 
       # Windows: Archive ONLY the .exe
       - name: Package Windows Archive
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path isolated_bin\${{ matrix.binary_name }} -DestinationPath ${{ matrix.archive_name }} -Force
+          Copy-Item -Recurse registry isolated_bin\registry
+          Copy-Item -Recurse templates isolated_bin\templates
+          Compress-Archive -Path isolated_bin\* -DestinationPath ${{ matrix.archive_name }} -Force
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4

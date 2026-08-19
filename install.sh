@@ -85,7 +85,7 @@ if [ ! -f "${TMP_DIR}/${EXE_NAME}" ]; then
   log_error "Binary not found in archive"
 fi
 
-mv "${TMP_DIR}/${EXE_NAME}" "${INSTALL_DIR}/${EXE_NAME}"
+cp -r "${TMP_DIR}/." "${INSTALL_DIR}/"
 chmod +x "${INSTALL_DIR}/${EXE_NAME}"
 
 log_success "BackendForge installed to ${BOLD}${INSTALL_DIR}/${EXE_NAME}${RESET}"

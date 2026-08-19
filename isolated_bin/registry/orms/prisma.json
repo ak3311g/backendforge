@@ -1,0 +1,14 @@
+{
+    "id": "prisma",
+    "name": "Prisma",
+    "description": "Prisma is an open-source database toolkit that makes app developers more productive and confident when working with databases.",
+    "type": "framework",
+    "languages": [
+        "javaScript",
+        "typeScript"
+    ],
+    "architecture": [
+        "layered",
+        "modular"
+    ]
+}

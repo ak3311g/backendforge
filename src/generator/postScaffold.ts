@@ -52,7 +52,7 @@ export async function runPostScaffold(targetDir: string, options: ProjectOptions
   if (options.installDeps) {
     spinner.start('Installing dependencies...');
     try {
-      if (options.language === 'typescript') {
+      if (options.language === 'typescript' || options.language === 'javascript') {
         const pm = detectNodePackageManager();
         await runCommand(pm, ['install'], targetDir);
 

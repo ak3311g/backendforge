@@ -1,6 +1,9 @@
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import fs from 'fs-extra';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export interface LanguageMetadata {
   id: string;
   name: string;
@@ -16,21 +19,16 @@ export interface FrameworkMetadata {
   enabled: boolean;
 }
 
-// Helper to find the correct registry path whether running from src/ or dist/
 function getRegistryPath(subfolder: string): string {
-  // Option 1: Try relative to project root / current working directory
   const cwdPath = path.resolve(process.cwd(), 'registry', subfolder);
-  if (fs.existsSync(cwdPath)) {
-    return cwdPath;
-  }
+  if (fs.existsSync(cwdPath)) return cwdPath;
 
-  // Option 2: Try relative to this file's directory (src/registry/ or dist/registry/)
+  const execDirPath = path.resolve(path.dirname(process.execPath), 'registry', subfolder);
+  if (fs.existsSync(execDirPath)) return execDirPath;
+
   const relativePath = path.resolve(__dirname, '../../registry', subfolder);
-  if (fs.existsSync(relativePath)) {
-    return relativePath;
-  }
+  if (fs.existsSync(relativePath)) return relativePath;
 
-  // Fallback for dist subfolder layouts
   return path.resolve(__dirname, '../registry', subfolder);
 }
 

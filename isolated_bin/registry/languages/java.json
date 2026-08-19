@@ -1,0 +1,6 @@
+{
+  "id": "java",
+  "name": "Java",
+  "hint": "Enterprise-grade, type-safe, rock-solid ecosystem (Java 21 LTS)",
+  "enabled": true
+}

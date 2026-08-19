@@ -1,0 +1,6 @@
+{
+  "id": "javascript",
+  "name": "JavaScript",
+  "hint": "JavaScript runtime (Node.js/Bun)",
+  "enabled": true
+}

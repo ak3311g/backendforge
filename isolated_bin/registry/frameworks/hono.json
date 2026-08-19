@@ -1,0 +1,7 @@
+{
+  "id": "hono",
+  "name": "Hono",
+  "hint": "Ultrafast, lightweight, multi-runtime framework with full type safety",
+  "languages": ["typescript"],
+  "enabled": true
+}

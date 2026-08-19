@@ -1,0 +1,6 @@
+{
+    "id": "postgresql",
+    "name": "PostgreSQL",
+    "description" : "Some DB",
+    "type" : "Database"
+}

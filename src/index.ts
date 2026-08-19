@@ -4,6 +4,7 @@ import { promptProjectOptions } from './cli/prompts/project.js';
 import { generateProject } from './generator/generator.js';
 import { runPostScaffold } from './generator/postScaffold.js';
 
+
 async function main() {
   console.clear();
   p.intro(color.bgCyan(color.black(' ⚡ BACKENDFORGE CLI ')));
