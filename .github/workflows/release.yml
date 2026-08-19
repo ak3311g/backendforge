@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install Dependencies
@@ -53,17 +53,11 @@ jobs:
             binary_name: backendforge
             archive_name: backendforge-linux-x64.tar.gz
 
-          # macOS ARM64
+          # macOS ARM64 (Apple Silicon)
           - os: macos-latest
             target: bun-darwin-arm64
             binary_name: backendforge
             archive_name: backendforge-darwin-arm64.tar.gz
-
-          # macOS x64 (Intel)
-          - os: macos-13
-            target: bun-darwin-x64
-            binary_name: backendforge
-            archive_name: backendforge-darwin-x64.tar.gz
 
           # Windows x64
           - os: windows-latest
